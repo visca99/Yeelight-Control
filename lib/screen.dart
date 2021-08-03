@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:desktop_window/desktop_window.dart';
 import 'package:yeelight_control/Models/yeelight.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:window_size/window_size.dart';
 
 class Screen extends StatefulWidget {
   const Screen() : super();
@@ -30,7 +31,7 @@ class _ScreenState extends State<Screen> {
     RawDatagramSocket.bind(InternetAddress.anyIPv4, 1982)
         .then((RawDatagramSocket udpSocket) {
       udpSocket.broadcastEnabled = true;
-      udpSocket.listen((e) {
+      udpSocket.listen((e) async {
         Datagram? dg = udpSocket.receive();
         if (dg != null) {
           String rawData = String.fromCharCodes(dg.data);
@@ -58,8 +59,13 @@ class _ScreenState extends State<Screen> {
             setState(() {
               _bulbs.add(newBulb);
             });
-            DesktopWindow.setMaxWindowSize(Size(1000, 200));
-            DesktopWindow.setWindowSize(Size(_bulbs.length * 150, 200));
+            if (_bulbs.length == 1) {
+              setWindowMinSize(Size(300, 200));
+              setWindowMaxSize(Size(300, 200));
+            } else {
+              setWindowMinSize(Size(_bulbs.length * 150, 200));
+              setWindowMaxSize(Size(_bulbs.length * 150, 200));
+            }
           }
         }
       });
@@ -72,6 +78,7 @@ class _ScreenState extends State<Screen> {
   @override
   void initState() {
     Future.delayed(Duration.zero, () async {
+      setWindowTitle("Yeelight Control");
       await yeelightSearch();
     });
     super.initState();
@@ -149,8 +156,6 @@ class _ScreenState extends State<Screen> {
 
   @override
   Widget build(BuildContext context) {
-    //DesktopWindow.setMinWindowSize(Size(10, 200));
-    //DesktopWindow.setMaxWindowSize(Size(1000, 200));
     return Scaffold(
       appBar: AppBar(
         title: Text("Yeelight Control"),
@@ -164,6 +169,7 @@ class _ScreenState extends State<Screen> {
       ),
       body: Container(
         color: Colors.grey[300],
+        alignment: Alignment.center,
         child: ListView.builder(
             scrollDirection: Axis.horizontal,
             shrinkWrap: true,
@@ -172,6 +178,8 @@ class _ScreenState extends State<Screen> {
               return Container(
                 width: 150,
                 child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(25))),
                   margin: EdgeInsets.all(5),
                   child: Column(
                     children: <Widget>[
@@ -203,16 +211,20 @@ class _ScreenState extends State<Screen> {
                         padding: EdgeInsets.only(
                                 bottom: MediaQuery.of(context).size.height) *
                             0.08,
-                        child: Switch(
-                          onChanged: (bool value) {
-                            toggleStatus(_bulbs[index]);
-                          },
-                          value: _bulbs[index].status,
-                          activeColor: Colors.yellow[700],
-                          activeTrackColor: Colors.yellow,
-                          inactiveThumbColor: Colors.grey[700],
-                          inactiveTrackColor: Colors.grey,
-                        ),
+                        child: IconButton(
+                            icon: Icon(
+                              FontAwesomeIcons.lightbulb,
+                              color: _bulbs[index].status
+                                  ? Colors.yellow[700]
+                                  : Colors.grey,
+                            ),
+                            onPressed: () {
+                              toggleStatus(_bulbs[index]);
+                            },
+                            iconSize: 38,
+                            splashRadius: 30,
+                            splashColor: Colors.yellow,
+                            hoverColor: Colors.grey[300]),
                       ),
                     ],
                   ),
