@@ -154,6 +154,31 @@ class _ScreenState extends State<Screen> {
     );
   }
 
+  Future<void> _settingsDialog(BuildContext contex) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "More settings",
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue[800]),
+          ),
+          titlePadding: EdgeInsets.only(left: 20, top: 20),
+          contentPadding: EdgeInsets.only(top: 10, left: 18, right: 18),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -186,15 +211,21 @@ class _ScreenState extends State<Screen> {
                       Padding(
                         padding: EdgeInsets.only(top: 10),
                         child: TextButton(
-                          child: Text(
-                            _bulbs[index].name != ""
-                                ? _bulbs[index].name
-                                : "CLICK TO RENAME",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 21,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue[800]),
+                          style: ButtonStyle(
+                              overlayColor:
+                                  MaterialStateProperty.all(Colors.grey[200])),
+                          child: Padding(
+                            padding: const EdgeInsets.all(5),
+                            child: Text(
+                              _bulbs[index].name != ""
+                                  ? _bulbs[index].name
+                                  : "CLICK TO RENAME",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 21,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue[800]),
+                            ),
                           ),
                           onPressed: () {
                             _changeNameDialog(context, _bulbs[index])
@@ -211,20 +242,34 @@ class _ScreenState extends State<Screen> {
                         padding: EdgeInsets.only(
                                 bottom: MediaQuery.of(context).size.height) *
                             0.08,
-                        child: IconButton(
-                            icon: Icon(
-                              FontAwesomeIcons.lightbulb,
-                              color: _bulbs[index].status
-                                  ? Colors.yellow[700]
-                                  : Colors.grey,
-                            ),
-                            onPressed: () {
-                              toggleStatus(_bulbs[index]);
-                            },
-                            iconSize: 38,
-                            splashRadius: 30,
-                            splashColor: Colors.yellow,
-                            hoverColor: Colors.grey[300]),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  _settingsDialog(context);
+                                },
+                                iconSize: 20,
+                                splashRadius: 20,
+                                color: Colors.grey,
+                                icon: Icon(FontAwesomeIcons.slidersH),
+                                hoverColor: Colors.grey[200]),
+                            IconButton(
+                                icon: Icon(
+                                  FontAwesomeIcons.lightbulb,
+                                  color: _bulbs[index].status
+                                      ? Colors.yellow[700]
+                                      : Colors.grey,
+                                ),
+                                onPressed: () {
+                                  toggleStatus(_bulbs[index]);
+                                },
+                                iconSize: 42,
+                                splashRadius: 30,
+                                splashColor: Colors.yellow,
+                                hoverColor: Colors.grey[300]),
+                          ],
+                        ),
                       ),
                     ],
                   ),
