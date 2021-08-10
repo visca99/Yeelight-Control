@@ -5,15 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:yeelight_control/Models/yeelight.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:window_size/window_size.dart';
+import 'package:yeelight_control/Screens/more_settings.dart';
 
-class Screen extends StatefulWidget {
-  const Screen() : super();
+class MainScreen extends StatefulWidget {
+  const MainScreen() : super();
 
   @override
-  _ScreenState createState() => _ScreenState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
-class _ScreenState extends State<Screen> {
+class _MainScreenState extends State<MainScreen> {
   List<Yeelight> _bulbs = [];
 
   void toggleStatus(Yeelight lamp) {
@@ -35,15 +36,17 @@ class _ScreenState extends State<Screen> {
         Datagram? dg = udpSocket.receive();
         if (dg != null) {
           String rawData = String.fromCharCodes(dg.data);
-          //dynamic jsondata = jsonDecode(rawData);
           //print(rawData);
-          //print("\n\r");
+
+          //Get bulb ip address
           InternetAddress ip = InternetAddress(rawData.substring(
               rawData.indexOf("Location: yeelight://") + 21,
               rawData.indexOf(
                   ":", rawData.indexOf('Location: yeelight://') + 21)));
+          //Get bulb name
           String name = rawData.substring(rawData.indexOf("name: ") + 6,
               rawData.indexOf("\r\n", rawData.indexOf("name: ") + 6));
+          //Get bulb status
           bool status;
           if (rawData.substring(rawData.indexOf("power: ") + 7,
                   rawData.indexOf("\r\n", rawData.indexOf("power: ") + 7)) ==
@@ -52,14 +55,24 @@ class _ScreenState extends State<Screen> {
           } else {
             status = false;
           }
+          //Get bulb bright
+          int bright;
+          try {
+            bright = int.tryParse(rawData.substring(
+                rawData.indexOf("bright: ") + 8,
+                rawData.indexOf("\r\n", rawData.indexOf("bright: ") + 8)))!;
+          } catch (e) {
+            bright = 0;
+          }
 
-          Yeelight newBulb = Yeelight(name: name, ip: ip, status: status);
+          Yeelight newBulb =
+              Yeelight(name: name, ip: ip, status: status, bright: bright);
 
           if (_bulbs.indexOf(newBulb) == -1) {
             setState(() {
               _bulbs.add(newBulb);
             });
-            if (_bulbs.length == 1) {
+            if (_bulbs.length < 3) {
               setWindowMinSize(Size(300, 200));
               setWindowMaxSize(Size(300, 200));
             } else {
@@ -154,31 +167,6 @@ class _ScreenState extends State<Screen> {
     );
   }
 
-  Future<void> _settingsDialog(BuildContext contex) {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            "More settings",
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue[800]),
-          ),
-          titlePadding: EdgeInsets.only(left: 20, top: 20),
-          contentPadding: EdgeInsets.only(top: 10, left: 18, right: 18),
-          content: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -247,7 +235,11 @@ class _ScreenState extends State<Screen> {
                           children: [
                             IconButton(
                                 onPressed: () {
-                                  _settingsDialog(context);
+                                  Navigator.pushNamed(context, "/more_settings",
+                                          arguments: _bulbs[index])
+                                      .whenComplete(() async {
+                                    await yeelightSearch();
+                                  });
                                 },
                                 iconSize: 20,
                                 splashRadius: 20,

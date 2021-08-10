@@ -5,12 +5,17 @@ class Yeelight extends Equatable {
   String _name;
   InternetAddress _ip;
   bool _status;
+  int _bright;
 
   Yeelight(
-      {required String name, required InternetAddress ip, required bool status})
+      {required String name,
+      required InternetAddress ip,
+      required bool status,
+      required int bright})
       : this._name = name,
         this._ip = ip,
-        this._status = status;
+        this._status = status,
+        this._bright = bright;
 
   String get name {
     return _name;
@@ -22,6 +27,10 @@ class Yeelight extends Equatable {
 
   bool get status {
     return _status;
+  }
+
+  int get bright {
+    return _bright;
   }
 
   set name(String name) {
@@ -36,6 +45,10 @@ class Yeelight extends Equatable {
     this._status = status;
   }
 
+  set bright(int bright) {
+    this._bright = bright;
+  }
+
   @override
-  List<Object?> get props => [_name, _ip, _status];
+  List<Object?> get props => [_name, _ip];
 }
