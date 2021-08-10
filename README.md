@@ -1,3 +1,3 @@
 # Yeelight Control
 
-Flutter app(GUI) to control Yeelight bulbs.
+Flutter Desktop app(GUI) to control Yeelight bulbs.
